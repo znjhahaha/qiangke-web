@@ -3,6 +3,8 @@ import { getDataDir, loadDataFromFile, saveDataToFile, ensureDataDir } from '@/l
 import path from 'path'
 import { ActivationCode, validateActivationCode } from '@/lib/activation-code-manager'
 
+export const dynamic = 'force-dynamic'
+
 // 初始化数据路径
 async function initDataPaths() {
   const dataDir = await getDataDir()

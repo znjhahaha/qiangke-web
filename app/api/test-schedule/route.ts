@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getScheduleData, formatScheduleData } from '@/lib/course-api'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     console.log('🧪 测试课表API...')
