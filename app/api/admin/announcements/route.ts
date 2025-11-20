@@ -70,7 +70,21 @@ export const dynamic = 'force-dynamic'
 // GET: 获取所有公告（公开接口）
 export async function GET(request: NextRequest) {
   try {
-    await initAnnouncements()
+    try {
+      await initAnnouncements()
+    } catch (initError: any) {
+      console.error('❌ 初始化公告数据失败:', {
+        error: initError.message,
+        stack: initError.stack
+      })
+      // 如果初始化失败，返回空数组而不是错误
+      // 这样前端至少可以正常显示，只是没有公告
+      return NextResponse.json({
+        success: true,
+        data: [],
+        warning: '公告数据加载失败，返回空列表'
+      })
+    }
     
     const { searchParams } = new URL(request.url)
     const activeOnly = searchParams.get('activeOnly') === 'true'
