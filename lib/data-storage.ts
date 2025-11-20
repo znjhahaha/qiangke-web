@@ -258,7 +258,8 @@ export function clearFileCache(filePath?: string, dataKey?: string): void {
 export function cleanupExpiredCache(): number {
   const now = Date.now()
   let removed = 0
-  for (const [key, value] of fileCache.entries()) {
+  // 使用 Array.from 来兼容旧版 TypeScript
+  for (const [key, value] of Array.from(fileCache.entries())) {
     if (now - value.timestamp > CACHE_TTL) {
       fileCache.delete(key)
       removed++
