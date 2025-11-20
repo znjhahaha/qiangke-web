@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 127.0.0.1",
-    "build": "EDGEONE=true node scripts/prepare-static-export.js && EDGEONE=true next build && node scripts/restore-dynamic-routes.js",
+    "build": "export EDGEONE=true && node scripts/prepare-static-export.js && next build && node scripts/restore-dynamic-routes.js",
     "build:analyze": "ANALYZE=true next build",
     "build:apk": "BUILD_APK=true npm run build && npx cap sync android",
     "build:apk:full": "npm run build && npx cap sync android && npx cap open android",
