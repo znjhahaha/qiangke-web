@@ -199,50 +199,13 @@ export async function getStudentInfo(sessionId?: string, tempCookie?: string, sc
       console.log(`🔍 使用的域名: ${currentSchool.protocol}://${currentSchool.domain}`)
       
       console.log('🔍 正在获取学生信息...', sessionId ? `(会话: ${sessionId})` : '', tempCookie ? '(使用临时Cookie)' : '')
-      console.log('🔍 请求配置:', {
-        url: urls.studentInfo,
-        method: config.method,
-        hasCookie: !!tempCookie,
-        cookieLength: tempCookie?.length || 0,
-        headers: Object.keys(config.headers || {})
-      })
-      
       const response = await robustFetch(urls.studentInfo, config)
     
     if (!response.ok) {
-      const errorText = await response.text().catch(() => '无法读取错误信息')
-      console.error(`❌ 获取学生信息失败，状态码: ${response.status}`, {
-        statusText: response.statusText,
-        errorText: errorText.substring(0, 500),
-        url: urls.studentInfo
-      })
-      
-      // 处理特殊状态码
-      if (response.status === 901 || response.status === 910) {
-        throw new Error('Cookie已过期，请重新登录')
-      }
-      
-      throw new Error(`获取学生信息失败，状态码: ${response.status}${errorText ? ` - ${errorText.substring(0, 100)}` : ''}`)
+      throw new Error(`获取学生信息失败，状态码: ${response.status}`)
     }
 
     const html = await response.text()
-    
-    // 检查HTML内容，判断是否是登录页面或错误页面
-    if (html.length < 100) {
-      console.error('❌ 返回的HTML内容过短，可能是错误页面:', html.substring(0, 200))
-      throw new Error('返回的页面内容异常，可能是Cookie无效或已过期')
-    }
-    
-    // 检查是否是登录页面（通常包含"登录"、"用户名"、"密码"等关键词）
-    const isLoginPage = html.includes('登录') || html.includes('用户名') || html.includes('password') || 
-                        html.includes('login') || html.includes('userName') || html.includes('user_name')
-    
-    if (isLoginPage) {
-      console.error('❌ 检测到登录页面，Cookie可能已过期或无效')
-      console.error('❌ HTML片段:', html.substring(0, 500))
-      throw new Error('Cookie已过期或无效，请重新登录')
-    }
-    
     const $ = cheerio.load(html)
     
     console.log('🔍 学生信息页面HTML长度:', html.length)

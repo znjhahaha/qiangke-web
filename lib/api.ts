@@ -37,37 +37,10 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 
   try {
     const apiBaseUrl = getApiBaseUrlDynamic()
-    const fullUrl = `${apiBaseUrl}${url}`
-    
-    // 添加调试日志（开发环境或生产环境都记录，便于排查问题）
-    console.log(`🌐 API请求: ${fullUrl}`, { 
-      apiBaseUrl,
-      hasCookie: !!headers['x-course-cookie'],
-      cookieLength: headers['x-course-cookie']?.length || 0
-    })
-    
-    const response = await fetch(fullUrl, {
+    const response = await fetch(`${apiBaseUrl}${url}`, {
       headers,
       ...options,
     })
-
-    // 添加响应状态日志
-    if (!response.ok) {
-      console.error(`❌ API请求失败: ${fullUrl}`, { 
-        status: response.status, 
-        statusText: response.statusText,
-        apiBaseUrl,
-        url
-      })
-      
-      // 如果是 404，可能是静态部署环境，API 路由不可用
-      if (response.status === 404) {
-        const errorText = await response.clone().text().catch(() => '')
-        if (errorText.includes('404') || errorText.length < 100) {
-          throw new Error(`API路由不可用 (404)。如果部署在静态托管平台（如 EdgeOne Pages），请配置环境变量 NEXT_PUBLIC_API_BASE_URL 指向外部 API 服务器。当前 API 地址: ${apiBaseUrl}`)
-        }
-      }
-    }
 
     // 尝试解析响应，无论状态码如何
     let data: any
@@ -104,22 +77,6 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 
     return data as T
   } catch (error: any) {
-    // 添加详细的错误日志
-    const apiBaseUrl = getApiBaseUrlDynamic()
-    const fullUrl = `${apiBaseUrl}${url}`
-    console.error(`❌ API请求异常: ${fullUrl}`, {
-      error: error.message,
-      stack: error.stack,
-      name: error.name,
-      apiBaseUrl,
-      url
-    })
-    
-    // 如果是网络错误（如 CORS、连接失败等）
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error(`无法连接到API服务器 (${apiBaseUrl})。请检查：1) API服务器是否运行 2) 网络连接是否正常 3) CORS配置是否正确`)
-    }
-    
     // 如果是我们主动抛出的错误，直接抛出
     if (error instanceof Error && error.message) {
       throw error
