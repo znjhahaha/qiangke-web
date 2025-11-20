@@ -20,7 +20,10 @@ const nextConfig = {
   
   // 编译器优化
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    // 生产环境只移除 console.log，保留 console.error 和 console.warn 用于调试
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn']
+    } : false,
   },
   
   // 实验性功能
