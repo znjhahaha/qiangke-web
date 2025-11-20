@@ -9,7 +9,7 @@
     "build:analyze": "ANALYZE=true next build",
     "build:apk": "BUILD_APK=true npm run build && npx cap sync android",
     "build:apk:full": "npm run build && npx cap sync android && npx cap open android",
-    "build:edge": "mkdir -p functions-dist && esbuild functions/index.js --bundle --format=esm --outfile=functions-dist/index.js --platform=neutral --external:node:*",
+    "build:edge": "if [ -f functions/index.js ]; then mkdir -p functions-dist && esbuild functions/index.js --bundle --format=esm --outfile=functions-dist/index.js --platform=neutral --external:node:*; else echo '⚠️  functions/index.js 不存在，跳过 EdgeOne Functions 构建'; fi",
     "build:edgeone": "npm run build:edge && node scripts/create-worker.js",
     "start": "next start",
     "lint": "next lint",

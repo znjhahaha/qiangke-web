@@ -13,9 +13,9 @@ const workerPath = path.join(process.cwd(), '_worker.js')
 
 // 检查 functions-dist/index.js 是否存在
 if (!fs.existsSync(functionsDistPath)) {
-  console.error('❌ 错误: functions-dist/index.js 不存在')
-  console.error('   请先运行: npm run build:edge')
-  process.exit(1)
+  console.log('⚠️  警告: functions-dist/index.js 不存在')
+  console.log('   跳过 _worker.js 创建（可能 functions/index.js 不存在）')
+  process.exit(0) // 退出码 0 表示成功，只是跳过创建
 }
 
 // 创建 _worker.js 文件
