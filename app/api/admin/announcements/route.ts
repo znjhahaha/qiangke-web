@@ -57,11 +57,23 @@ let isLoaded = false
 
 // 初始化加载
 async function initAnnouncements() {
-  // 始终从文件加载最新数据，确保数据一致性
-  announcements = await loadAnnouncements()
-  isLoaded = true
-  console.log('📢 已加载公告数据:', announcements.length, '条')
-  return announcements
+  try {
+    // 始终从文件加载最新数据，确保数据一致性
+    announcements = await loadAnnouncements()
+    isLoaded = true
+    console.log('📢 已加载公告数据:', announcements.length, '条')
+    return announcements
+  } catch (error: any) {
+    console.error('❌ 加载公告数据失败:', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code
+    })
+    // 如果加载失败，返回空数组，避免阻塞API
+    announcements = []
+    isLoaded = true
+    return announcements
+  }
 }
 
 // 强制动态渲染（避免静态导出问题）
