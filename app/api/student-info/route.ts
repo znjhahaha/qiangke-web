@@ -44,11 +44,13 @@ export async function GET(request: NextRequest) {
       data: studentInfo
     })
   } catch (error: any) {
+    // 重新获取 cookieHeader，因为在 catch 块中可能无法访问
+    const cookieHeaderInError = request.headers.get('x-course-cookie')
     console.error('❌ API路由：获取学生信息失败', {
       error: error.message,
       stack: error.stack,
       name: error.name,
-      cookieLength: cookieHeader?.length || 0
+      cookieLength: cookieHeaderInError?.length || 0
     })
     
     // 处理特殊错误
