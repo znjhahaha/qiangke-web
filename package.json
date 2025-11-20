@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "太原科技大学选课工具 - Next.js现代化界面",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev -H 127.0.0.1",
     "build": "node scripts/prepare-static-export.js && next build && node scripts/restore-dynamic-routes.js",
