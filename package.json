@@ -10,7 +10,6 @@
     "build:apk": "BUILD_APK=true npm run build && npx cap sync android",
     "build:apk:full": "npm run build && npx cap sync android && npx cap open android",
     "start": "next start",
-    "start:serverless": "node handler.js",
     "lint": "next lint",
     "perf": "next build && next start",
     "clean": "rm -rf .next out",

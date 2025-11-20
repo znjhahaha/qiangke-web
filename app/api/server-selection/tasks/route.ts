@@ -15,8 +15,6 @@ import { getDataDir, loadDataFromFile } from '@/lib/data-storage'
 import path from 'path'
 import { ActivationCode } from '@/lib/activation-code-manager'
 
-export const dynamic = 'force-dynamic'
-
 // POST: 提交服务器端抢课任务
 export async function POST(request: NextRequest) {
   try {

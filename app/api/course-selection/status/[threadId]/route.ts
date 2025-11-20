@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGlobalSelector } from '@/lib/smart-course-selector'
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(
   request: NextRequest,
   { params }: { params: { threadId: string } }

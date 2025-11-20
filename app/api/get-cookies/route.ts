@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(request: NextRequest) {
   try {
     // 这里应该从实际的登录会话中获取Cookie

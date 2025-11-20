@@ -84,30 +84,11 @@ export async function GET(request: NextRequest) {
       region: config.Region
     })
   } catch (error: any) {
-    console.error('❌ 获取 COS 文件列表失败:', {
-      error: error.message,
-      stack: error.stack,
-      name: error.name,
-      code: error.code,
-      isCosEnabled: isCosEnabled(),
-      hasConfig: !!getCosConfig()
-    })
-    
-    // 提供更详细的错误信息
-    let errorMessage = error.message || '获取文件列表失败'
-    if (error.code) {
-      errorMessage += ` (错误代码: ${error.code})`
-    }
-    
+    console.error('❌ 获取 COS 文件列表失败:', error)
     return NextResponse.json({
       success: false,
-      error: errorMessage,
-      message: errorMessage,
-      details: {
-        isCosEnabled: isCosEnabled(),
-        hasConfig: !!getCosConfig(),
-        errorCode: error.code
-      }
+      error: error.message || '获取文件列表失败',
+      message: error.message || '获取 COS 文件列表时发生错误'
     }, { status: 500 })
   }
 }

@@ -57,23 +57,11 @@ let isLoaded = false
 
 // 初始化加载
 async function initAnnouncements() {
-  try {
-    // 始终从文件加载最新数据，确保数据一致性
-    announcements = await loadAnnouncements()
-    isLoaded = true
-    console.log('📢 已加载公告数据:', announcements.length, '条')
-    return announcements
-  } catch (error: any) {
-    console.error('❌ 加载公告数据失败:', {
-      error: error.message,
-      stack: error.stack,
-      code: error.code
-    })
-    // 如果加载失败，返回空数组，避免阻塞API
-    announcements = []
-    isLoaded = true
-    return announcements
-  }
+  // 始终从文件加载最新数据，确保数据一致性
+  announcements = await loadAnnouncements()
+  isLoaded = true
+  console.log('📢 已加载公告数据:', announcements.length, '条')
+  return announcements
 }
 
 // 强制动态渲染（避免静态导出问题）
@@ -82,21 +70,7 @@ export const dynamic = 'force-dynamic'
 // GET: 获取所有公告（公开接口）
 export async function GET(request: NextRequest) {
   try {
-    try {
-      await initAnnouncements()
-    } catch (initError: any) {
-      console.error('❌ 初始化公告数据失败:', {
-        error: initError.message,
-        stack: initError.stack
-      })
-      // 如果初始化失败，返回空数组而不是错误
-      // 这样前端至少可以正常显示，只是没有公告
-      return NextResponse.json({
-        success: true,
-        data: [],
-        warning: '公告数据加载失败，返回空列表'
-      })
-    }
+    await initAnnouncements()
     
     const { searchParams } = new URL(request.url)
     const activeOnly = searchParams.get('activeOnly') === 'true'

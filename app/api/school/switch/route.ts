@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateSchoolConfig, getCurrentSchoolInfo } from '@/lib/course-api'
 
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   try {
     const { schoolId } = await request.json()

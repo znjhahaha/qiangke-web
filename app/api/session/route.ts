@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { setSessionCookie, getSessionCookie, deleteSessionCookie } from '@/lib/course-api'
 
-export const dynamic = 'force-dynamic'
-
 // 创建新会话
 export async function POST(request: NextRequest) {
   try {
