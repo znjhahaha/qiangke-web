@@ -29,7 +29,7 @@ const nextConfig = {
   },
   
   // 简化的webpack配置
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -46,6 +46,11 @@ const nextConfig = {
       config.externals.push('undici')
     } else {
       config.externals = [config.externals, 'undici']
+    }
+    
+    // 生产环境禁用缓存，避免文件过大（Cloudflare Pages 限制 25MB）
+    if (!dev && process.env.NODE_ENV === 'production') {
+      config.cache = false
     }
     
     return config

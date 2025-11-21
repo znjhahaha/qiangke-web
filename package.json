@@ -5,10 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 127.0.0.1",
-    "build": "node scripts/prepare-static-export.js && next build && node scripts/restore-dynamic-routes.js",
+    "build": "node scripts/prepare-static-export.js && next build && node scripts/restore-dynamic-routes.js && node scripts/clean-cache.js",
     "build:analyze": "ANALYZE=true next build",
     "build:apk": "BUILD_APK=true npm run build && npx cap sync android",
     "build:apk:full": "npm run build && npx cap sync android && npx cap open android",
+    "build:cloudflare": "next build && node scripts/clean-cache.js",
     "start": "next start",
     "lint": "next lint",
     "perf": "next build && next start",
