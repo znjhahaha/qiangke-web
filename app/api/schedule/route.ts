@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getScheduleData, formatScheduleData } from '@/lib/course-api'
 
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     console.log('📅 API: 开始获取课表数据')

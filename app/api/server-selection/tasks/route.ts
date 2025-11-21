@@ -15,6 +15,10 @@ import { getDataDir, loadDataFromFile } from '@/lib/data-storage'
 import path from 'path'
 import { ActivationCode } from '@/lib/activation-code-manager'
 
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要，因为使用了文件系统）
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // POST: 提交服务器端抢课任务
 export async function POST(request: NextRequest) {
   try {

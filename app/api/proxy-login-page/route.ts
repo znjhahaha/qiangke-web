@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const ssoLoginUrl = "https://sso1.tyust.edu.cn/login"

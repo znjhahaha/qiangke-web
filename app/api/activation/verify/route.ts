@@ -17,6 +17,10 @@ interface ActivationRecord {
   expiresAt: number
 }
 
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要，因为使用了文件系统）
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // 加载激活记录
 async function loadActivationRecords(): Promise<ActivationRecord[]> {
   const { activationRecordsFile } = await initDataPaths()

@@ -66,12 +66,16 @@ async function loadUrlConfigs(): Promise<Record<string, any>> {
         console.log(`✅ 从 COS 加载URL配置: ${cosKey}`)
         return data.urlConfigs
       }
+      // COS 中没有数据，返回空对象
+      return {}
     } catch (error: any) {
-      console.warn('⚠️ 从 COS 加载URL配置失败，尝试使用文件系统:', error?.message)
+      console.error('❌ 从 COS 加载URL配置失败:', error?.message || error)
+      // 如果 COS 已配置，不应该回退到文件系统（EdgeOne Pages 文件系统可能是只读的）
+      throw new Error(`从 COS 加载URL配置失败: ${error?.message || String(error)}。请检查 COS 配置和环境变量。`)
     }
   }
 
-  // 使用文件系统
+  // 如果 COS 未配置，使用文件系统（仅用于本地开发）
   try {
     if (existsSync(urlConfigsFile)) {
       const content = await readFile(urlConfigsFile, 'utf-8')
@@ -105,14 +109,21 @@ async function saveUrlConfigs(urlConfigs: Record<string, any>) {
       console.log(`✅ URL配置已保存到 COS: ${cosKey}`)
       return
     } catch (error: any) {
-      console.warn('⚠️ 保存URL配置到 COS 失败，尝试使用文件系统:', error?.message)
+      console.error('❌ 保存URL配置到 COS 失败:', error?.message || error)
+      // 如果 COS 已配置，不应该回退到文件系统（EdgeOne Pages 文件系统可能是只读的）
+      throw new Error(`保存URL配置到 COS 失败: ${error?.message || String(error)}。请检查 COS 配置和环境变量。`)
     }
   }
 
-  // 使用文件系统
-  await ensureDataDir(dataDir)
-  await writeFile(urlConfigsFile, JSON.stringify(data, null, 2), 'utf-8')
-  console.log('✅ URL配置已保存到文件:', urlConfigsFile)
+  // 如果 COS 未配置，使用文件系统（仅用于本地开发）
+  try {
+    await ensureDataDir(dataDir)
+    await writeFile(urlConfigsFile, JSON.stringify(data, null, 2), 'utf-8')
+    console.log('✅ URL配置已保存到文件:', urlConfigsFile)
+  } catch (error: any) {
+    console.error('❌ 保存URL配置到文件失败:', error?.message || error)
+    throw new Error(`保存URL配置失败: ${error?.message || String(error)}`)
+  }
 }
 
 // 服务器端存储（内存缓存 + 文件持久化）
@@ -134,6 +145,8 @@ async function initSchools() {
 
 // 强制动态渲染（避免静态导出问题）
 export const dynamic = 'force-dynamic'
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
 
 // GET: 获取所有学校列表
 export async function GET(request: NextRequest) {

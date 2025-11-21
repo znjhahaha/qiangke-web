@@ -3,6 +3,8 @@ import { getMaxConcurrentTasks, setMaxConcurrentTasks, getTaskStats } from '@/li
 
 // 强制动态渲染（避免静态导出问题）
 export const dynamic = 'force-dynamic'
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
 
 // GET: 获取服务器端抢课配置
 export async function GET(request: NextRequest) {

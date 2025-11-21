@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getGlobalSelector } from '@/lib/smart-course-selector'
 import { getGlobalCookie } from '@/lib/course-api'
 
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const cookie = getGlobalCookie()

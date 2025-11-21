@@ -121,8 +121,25 @@ export async function ensureDataDir(dataDir: string): Promise<void> {
 }
 
 /**
+ * 检查是否在 EdgeOne Pages 或类似的云环境中
+ */
+function isCloudEnvironment(): boolean {
+  // 检查常见的云环境标识
+  return !!(
+    process.env.VERCEL ||
+    process.env.NETLIFY ||
+    process.env.CF_PAGES ||
+    process.env.EDGEONE ||
+    process.env.EDGE_ONE ||
+    // 如果 COS 已配置，假设是云环境
+    isCosEnabled()
+  )
+}
+
+/**
  * 从文件或 COS 加载数据（通用）
  * 优先使用 COS，如果 COS 未配置则使用文件系统
+ * 在云环境中，如果 COS 已配置但失败，不会回退到文件系统
  */
 export async function loadDataFromFile<T>(
   filePath: string,
@@ -142,12 +159,24 @@ export async function loadDataFromFile<T>(
       // COS 中没有数据，返回默认值
       return defaultValue
     } catch (error: any) {
-      console.warn('⚠️ 从 COS 加载数据失败，尝试使用文件系统:', error?.message)
-      // COS 加载失败，回退到文件系统
+      const errorMessage = error?.message || String(error)
+      // 在云环境中，如果 COS 已配置但失败，不应该回退到文件系统
+      if (isCloudEnvironment()) {
+        console.error('❌ 从 COS 加载数据失败（云环境，不回退到文件系统）:', errorMessage)
+        // 文件不存在（404）是正常情况，返回默认值
+        if (error?.statusCode === 404 || error?.Code === 'NoSuchKey') {
+          return defaultValue
+        }
+        // 其他错误抛出异常
+        throw new Error(`从 COS 加载数据失败: ${errorMessage}。请检查 COS 配置和环境变量。`)
+      } else {
+        console.warn('⚠️ 从 COS 加载数据失败，尝试使用文件系统:', errorMessage)
+        // 本地环境，回退到文件系统
+      }
     }
   }
 
-  // 使用文件系统
+  // 使用文件系统（仅用于本地开发，或 COS 未配置的情况）
   try {
     if (existsSync(filePath)) {
       const content = await readFile(filePath, 'utf-8')
@@ -172,6 +201,7 @@ export async function loadDataFromFile<T>(
 /**
  * 保存数据到文件或 COS（通用）
  * 优先使用 COS，如果 COS 未配置则使用文件系统
+ * 在云环境中，如果 COS 已配置但失败，不会回退到文件系统
  */
 export async function saveDataToFile<T>(
   filePath: string,
@@ -193,8 +223,15 @@ export async function saveDataToFile<T>(
       console.log(`✅ 数据已保存到 COS: ${cosKey}`)
       return // COS 保存成功，直接返回
     } catch (error: any) {
-      console.warn('⚠️ 保存数据到 COS 失败，尝试使用文件系统:', error?.message)
-      // COS 保存失败，回退到文件系统
+      const errorMessage = error?.message || String(error)
+      // 在云环境中，如果 COS 已配置但失败，不应该回退到文件系统
+      if (isCloudEnvironment()) {
+        console.error('❌ 保存数据到 COS 失败（云环境，不回退到文件系统）:', errorMessage)
+        throw new Error(`保存数据到 COS 失败: ${errorMessage}。请检查 COS 配置和环境变量。`)
+      } else {
+        console.warn('⚠️ 保存数据到 COS 失败，尝试使用文件系统:', errorMessage)
+        // 本地环境，回退到文件系统
+      }
     }
   }
 

@@ -36,6 +36,8 @@ async function saveConfirmations(confirmations: Confirmation[]) {
 
 // 强制动态渲染（避免静态导出问题）
 export const dynamic = 'force-dynamic'
+// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
+export const runtime = 'nodejs'
 
 // POST: 确认收到公告
 export async function POST(request: NextRequest) {
