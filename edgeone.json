@@ -5,6 +5,9 @@
   "nodeVersion": "20.x",
   "framework": "nextjs",
   "startCommand": "npm start",
+  "functions": {
+    "enabled": false
+  },
   "headers": [
     {
       "source": "/api/:path*",
