@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { setSessionCookie, getSessionCookie, deleteSessionCookie } from '@/lib/course-api'
 
 // 创建新会话
-// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   try {
     const { cookie } = await request.json()

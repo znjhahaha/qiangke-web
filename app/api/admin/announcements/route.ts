@@ -66,8 +66,6 @@ async function initAnnouncements() {
 
 // 强制动态渲染（避免静态导出问题）
 export const dynamic = 'force-dynamic'
-// 明确指定使用 Node.js runtime（EdgeOne Pages 需要）
-export const runtime = 'nodejs'
 
 // GET: 获取所有公告（公开接口）
 export async function GET(request: NextRequest) {

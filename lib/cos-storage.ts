@@ -27,13 +27,6 @@ export function getCosConfig(): CosConfig | null {
   const bucket = process.env.COS_BUCKET
 
   if (!secretId || !secretKey || !bucket) {
-    console.log('ℹ️ COS 配置未完整设置，将使用文件系统存储')
-    console.log('   已设置的环境变量:', {
-      COS_SECRET_ID: secretId ? '已设置' : '未设置',
-      COS_SECRET_KEY: secretKey ? '已设置' : '未设置',
-      COS_REGION: region,
-      COS_BUCKET: bucket || '未设置'
-    })
     return null
   }
 
@@ -43,12 +36,6 @@ export function getCosConfig(): CosConfig | null {
     Region: region,
     Bucket: bucket
   }
-
-  console.log('✅ COS 配置已加载:', {
-    Region: region,
-    Bucket: bucket,
-    SecretId: secretId.substring(0, 8) + '...'
-  })
 
   return cosConfig
 }

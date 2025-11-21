@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server'
 
-// 明确指定使用 Node.js runtime（因为使用了 process.*）
-export const runtime = 'nodejs'
-
 export async function GET() {
   try {
     // 检查系统状态
