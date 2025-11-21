@@ -48,3 +48,4 @@ next-env.d.ts
 # EdgeOne Pages Functions build output
 /functions-dist
 /_worker.js
+/functions.disabled

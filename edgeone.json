@@ -3,6 +3,8 @@
   "installCommand": "npm install",
   "outputDirectory": ".next",
   "nodeVersion": "20.x",
+  "framework": "nextjs",
+  "startCommand": "npm start",
   "headers": [
     {
       "source": "/api/:path*",
