@@ -8,6 +8,8 @@ Next.js 应用在 Cloudflare Pages 上出现 404 错误，是因为：
 ## ✅ 已完成的配置
 - ✅ 已安装 `@cloudflare/next-on-pages` 适配器
 - ✅ 已更新构建脚本 `build:cloudflare`
+- ✅ 已升级 Next.js 到 14.3.0（满足适配器要求）
+- ✅ 已创建 `.npmrc` 文件（使用 legacy-peer-deps 解决依赖冲突）
 
 ## 🔧 Cloudflare Pages 设置步骤
 
@@ -53,6 +55,14 @@ NODE_ENV=production
 2. **确认输出目录**：构建日志中应该显示输出到 `.vercel/output/static`
 3. **检查文件大小**：确认没有文件超过 25MB
 4. **查看构建日志中的错误信息**：根据具体错误进行修复
+
+## 🔧 依赖冲突问题
+
+如果遇到依赖冲突错误（如 `ERESOLVE could not resolve`），项目已配置：
+- ✅ Next.js 已升级到 14.3.0（满足适配器要求）
+- ✅ `.npmrc` 文件已创建，使用 `legacy-peer-deps=true` 解决依赖冲突
+
+Cloudflare Pages 会自动使用 `.npmrc` 配置进行依赖安装。
 
 ## 📝 注意事项
 
