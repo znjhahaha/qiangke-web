@@ -16,8 +16,8 @@ function cleanCache() {
       fs.rmSync(cacheDir, { recursive: true, force: true })
       console.log('✅ 缓存目录已清理')
     } catch (error) {
-      console.error('❌ 清理缓存失败:', error.message)
-      process.exit(1)
+      console.warn('⚠️  清理缓存失败:', error.message)
+      // 不退出进程，避免影响构建流程
     }
   } else {
     console.log('ℹ️  缓存目录不存在，跳过清理')

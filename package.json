@@ -9,7 +9,7 @@
     "build:analyze": "ANALYZE=true next build",
     "build:apk": "BUILD_APK=true npm run build && npx cap sync android",
     "build:apk:full": "npm run build && npx cap sync android && npx cap open android",
-    "build:cloudflare": "next build && npx @cloudflare/next-on-pages && node scripts/clean-cache.js",
+    "build:cloudflare": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "next lint",
     "perf": "next build && next start",
