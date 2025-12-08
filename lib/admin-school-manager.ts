@@ -29,7 +29,7 @@ async function syncFromServer(): Promise<{ schools: SchoolConfig[], urlConfigs: 
   try {
     const lastSync = localStorage.getItem(STORAGE_KEY_LAST_SYNC) || '0'
     const response = await fetch(`/api/admin/schools?lastSync=${lastSync}`)
-    
+
     if (!response.ok) {
       console.warn('从服务器同步学校列表失败:', response.statusText)
       return null
@@ -37,15 +37,32 @@ async function syncFromServer(): Promise<{ schools: SchoolConfig[], urlConfigs: 
 
     const result = await response.json()
     if (result.success && result.data) {
-      // 保存到本地缓存
-      localStorage.setItem(STORAGE_KEY_SCHOOLS, JSON.stringify(result.data))
+      // 获取当前本地已有的学校（包括用户自己添加的）
+      const currentLocalSchools = getCustomSchools()
+
+      // 合并服务器数据和本地数据
+      // 服务器数据覆盖同ID的学校，但保留只在本地的学校
+      const serverSchools: SchoolConfig[] = result.data
+      const mergedSchools = [...serverSchools]
+
+      // 添加只在本地存在的学校
+      currentLocalSchools.forEach(localSchool => {
+        const existsOnServer = serverSchools.some(s => s.id === localSchool.id)
+        if (!existsOnServer) {
+          mergedSchools.push(localSchool)
+          console.log(`📌 保留本地添加的学校: ${localSchool.name}`)
+        }
+      })
+
+      // 保存合并后的结果到本地缓存
+      localStorage.setItem(STORAGE_KEY_SCHOOLS, JSON.stringify(mergedSchools))
       if (result.urlConfigs) {
         localStorage.setItem(STORAGE_KEY_URL_CONFIG, JSON.stringify(result.urlConfigs))
       }
       localStorage.setItem(STORAGE_KEY_LAST_SYNC, result.lastUpdateTime.toString())
-      
+
       return {
-        schools: result.data,
+        schools: mergedSchools,
         urlConfigs: result.urlConfigs || {},
         lastUpdateTime: result.lastUpdateTime
       }
@@ -122,7 +139,7 @@ export function getDefaultSchools(): SchoolConfig[] {
 // 获取所有学校（默认 + 服务器同步 + 自定义）
 export async function getAllSchools(sync = true): Promise<SchoolConfig[]> {
   const defaultSchools = getDefaultSchools()
-  
+
   if (typeof window === 'undefined') {
     return defaultSchools
   }
@@ -164,7 +181,7 @@ export async function getAllSchools(sync = true): Promise<SchoolConfig[]> {
 // 同步版本（同步调用）
 export function getAllSchoolsSync(): SchoolConfig[] {
   const defaultSchools = getDefaultSchools()
-  
+
   if (typeof window === 'undefined') {
     return defaultSchools
   }
@@ -208,7 +225,7 @@ export async function addSchool(school: SchoolConfig): Promise<void> {
   }
 
   const customSchools = getCustomSchools()
-  
+
   // 检查ID是否已存在
   if (customSchools.some(s => s.id === school.id)) {
     throw new Error(`学校ID "${school.id}" 已存在`)
@@ -227,6 +244,66 @@ export async function addSchool(school: SchoolConfig): Promise<void> {
   }
 }
 
+// 本地添加学校（自动尝试同步到服务器，普通用户可用）
+export async function addSchoolLocally(school: SchoolConfig): Promise<void> {
+  if (typeof window === 'undefined') {
+    throw new Error('只能在客户端环境中添加学校')
+  }
+
+  // 验证必填字段
+  if (!school.id || !school.name || !school.domain || !school.protocol) {
+    throw new Error('学校信息不完整，请填写所有必填字段')
+  }
+
+  // 验证ID格式（只允许小写字母、数字和下划线）
+  if (!/^[a-z0-9_]+$/.test(school.id)) {
+    throw new Error('学校ID只能包含小写字母、数字和下划线')
+  }
+
+  // 验证域名格式
+  if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/.test(school.domain)) {
+    throw new Error('域名格式不正确')
+  }
+
+  // 验证协议
+  if (school.protocol !== 'http' && school.protocol !== 'https') {
+    throw new Error('协议必须是 http 或 https')
+  }
+
+  const allSchools = getAllSchoolsSync()
+
+  // 检查ID是否已存在
+  if (allSchools.some(s => s.id === school.id)) {
+    throw new Error(`学校ID "${school.id}" 已存在，请使用其他ID`)
+  }
+
+  // 检查域名是否已存在
+  if (allSchools.some(s => s.domain === school.domain)) {
+    throw new Error(`域名 "${school.domain}" 已存在`)
+  }
+
+  // 1. 先添加到本地
+  const customSchools = getCustomSchools()
+  customSchools.push(school)
+  localStorage.setItem(STORAGE_KEY_SCHOOLS, JSON.stringify(customSchools))
+
+  console.log(`✅ 学校 "${school.name}" 已添加到本地`)
+
+  // 2. 尝试同步到服务器（后台操作，失败不影响本地使用）
+  try {
+    const synced = await syncToServer('add', { school })
+    if (synced) {
+      console.log(`🌐 学校 "${school.name}" 已自动同步到服务器，服务器端API现在可以访问此学校`)
+    } else {
+      console.log(`⚠️ 学校 "${school.name}" 同步到服务器失败（可能没有管理员权限），但本地仍可使用`)
+    }
+  } catch (error) {
+    console.warn(`⚠️ 学校 "${school.name}" 同步到服务器时出错:`, error)
+    console.log(`💡 提示：学校已保存在本地，但服务器端API可能无法访问。如需服务器端功能，请联系管理员`)
+  }
+}
+
+
 // 更新学校（同步到服务器）
 export async function updateSchool(oldId: string, newSchool: SchoolConfig): Promise<void> {
   if (typeof window === 'undefined') {
@@ -234,7 +311,7 @@ export async function updateSchool(oldId: string, newSchool: SchoolConfig): Prom
   }
 
   const customSchools = getCustomSchools()
-  
+
   // 如果ID改变了，需要检查新ID是否已存在
   if (oldId !== newSchool.id) {
     const allSchools = getAllSchoolsSync()
@@ -272,16 +349,16 @@ export async function deleteSchool(schoolId: string): Promise<void> {
   // 检查是否是默认学校
   const defaultSchools = getDefaultSchools()
   const isDefault = defaultSchools.some(s => s.id === schoolId)
-  
+
   if (isDefault) {
     throw new Error('无法删除默认学校，只能删除自定义添加的学校')
   }
 
   const customSchools = getCustomSchools()
   const filtered = customSchools.filter(s => s.id !== schoolId)
-  
+
   localStorage.setItem(STORAGE_KEY_SCHOOLS, JSON.stringify(filtered))
-  
+
   // 同时删除URL配置
   deleteSchoolUrlConfig(schoolId)
 

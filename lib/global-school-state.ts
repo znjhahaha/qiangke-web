@@ -61,8 +61,8 @@ const DEFAULT_SCHOOLS_LIST: SchoolConfig[] = [
 ]
 
 // 向后兼容：保留 SUPPORTED_SCHOOLS，但在客户端使用动态列表
-export const SUPPORTED_SCHOOLS: SchoolConfig[] = typeof window !== 'undefined' 
-  ? getSupportedSchools() 
+export const SUPPORTED_SCHOOLS: SchoolConfig[] = typeof window !== 'undefined'
+  ? getSupportedSchools()
   : DEFAULT_SCHOOLS_LIST
 
 // 默认学校
@@ -113,7 +113,7 @@ export function getCurrentSchool(): SchoolConfig {
 // 设置当前学校
 export function setCurrentSchool(school: SchoolConfig): void {
   currentSchool = school
-  
+
   // 在客户端环境中，保存到localStorage
   if (typeof window !== 'undefined') {
     try {
@@ -151,11 +151,11 @@ export function getSchoolById(id: string): SchoolConfig | undefined {
     console.error(`❌ 服务器端：找不到学校 ID "${id}"，默认列表中也未找到`)
     return undefined
   }
-  
+
   // 客户端：使用原有逻辑
   const schools = getSupportedSchools()
   const found = schools.find(school => school.id === id)
-  
+
   // 如果找不到学校，可能是新添加的，触发后台同步（不阻塞）
   if (!found) {
     console.warn(`⚠️ 找不到学校 ID "${id}"，可能尚未同步，触发后台同步`)
@@ -170,7 +170,7 @@ export function getSchoolById(id: string): SchoolConfig | undefined {
       console.error('后台同步学校列表失败:', error)
     })
   }
-  
+
   return found
 }
 
@@ -225,10 +225,10 @@ export async function getSchoolsFromServer(): Promise<SchoolConfig[]> {
     const { getDataDir, loadDataFromFile } = await import('./data-storage')
     const path = await import('path')
     const { isCosEnabled, loadFromCos } = await import('./cos-storage')
-    
+
     const dataDir = await getDataDir()
     const schoolsFile = path.join(dataDir, 'schools.json')
-    
+
     // 优先使用 COS 存储
     if (isCosEnabled()) {
       try {
@@ -245,7 +245,7 @@ export async function getSchoolsFromServer(): Promise<SchoolConfig[]> {
         console.warn('⚠️ 从 COS 加载学校列表失败，尝试使用文件系统:', error?.message)
       }
     }
-    
+
     // 使用文件系统
     const loaded = await loadDataFromFile<SchoolConfig>(schoolsFile, 'schools', [])
     if (loaded.length > 0) {
@@ -255,7 +255,7 @@ export async function getSchoolsFromServer(): Promise<SchoolConfig[]> {
       console.log(`📝 学校列表:`, loaded.map((s: SchoolConfig) => `${s.name} (${s.id})`).join(', '))
       return loaded
     }
-    
+
     // 如果没有找到，返回默认学校（合并默认学校和可能存在的自定义学校）
     console.warn('⚠️ 未找到学校配置文件或文件为空，使用默认学校列表')
     // 确保缓存也被设置为默认学校列表
@@ -292,10 +292,10 @@ async function getSchoolUrlConfigFromServer(schoolId: string): Promise<{
     const { readFile } = await import('fs/promises')
     const path = await import('path')
     const { isCosEnabled, loadFromCos } = await import('./cos-storage')
-    
+
     const dataDir = await getDataDir()
     const urlConfigsFile = path.join(dataDir, 'url-configs.json')
-    
+
     // 优先使用 COS 存储
     if (isCosEnabled()) {
       try {
@@ -310,7 +310,7 @@ async function getSchoolUrlConfigFromServer(schoolId: string): Promise<{
         console.warn('⚠️ 从 COS 加载URL配置失败，尝试使用文件系统:', error?.message)
       }
     }
-    
+
     // 使用文件系统
     if (existsSync(urlConfigsFile)) {
       const content = await readFile(urlConfigsFile, 'utf-8')
@@ -322,7 +322,7 @@ async function getSchoolUrlConfigFromServer(schoolId: string): Promise<{
   } catch (error: any) {
     console.error('从服务器获取URL配置失败:', error)
   }
-  
+
   return null
 }
 
@@ -350,7 +350,7 @@ async function getSchoolUrlConfigAsync(schoolId: string): Promise<{
       return serverConfig
     }
   }
-  
+
   // 回退到默认配置
   return DEFAULT_SCHOOL_URL_CONFIG[schoolId] || DEFAULT_SCHOOL_URL_CONFIG['tyust']
 }
@@ -376,23 +376,28 @@ function getSchoolUrlConfig(schoolId: string): {
           console.log(`📝 学校 "${schoolId}" 使用默认URL配置`)
           return isDefaultSchool
         }
-        
+
         // 不是默认学校且找不到配置，触发后台同步（不阻塞）
         console.warn(`⚠️ 找不到学校 "${schoolId}" 的URL配置，触发后台同步...`)
         getSchoolUrlConfigAsync(schoolId).then(syncedConfig => {
           if (syncedConfig) {
             console.log(`✅ 后台同步成功，获取到学校 "${schoolId}" 的URL配置:`, syncedConfig)
           } else {
-            console.warn(`⚠️ 即使同步后也找不到学校 "${schoolId}" 的URL配置，将使用空配置（可能导致某些功能不可用）`)
+            console.warn(`⚠️ 即使同步后也找不到学校 "${schoolId}" 的URL配置，将使用默认参数`)
           }
         }).catch(error => {
           console.error('后台同步URL配置失败:', error)
         })
-        
-        // 对于新添加的学校，如果没有配置，返回空对象而不是默认配置
-        // 这样至少域名是对的，只是URL参数可能不正确
-        console.warn(`⚠️ 学校 "${schoolId}" 没有URL配置，返回空配置（将使用学校的基础URL）`)
-        return {}
+
+        // 对于自定义添加的学校，使用默认的 gnmkdm 参数
+        // 这些参数适用于大多数使用正方教务系统的学校
+        const defaultGnmkdm = {
+          gradeGnmkdm: 'N305005',
+          courseGnmkdm: 'N253512',
+          scheduleGnmkdm: 'N253508'
+        }
+        console.log(`📝 学校 "${schoolId}" 使用默认 gnmkdm 参数`)
+        return defaultGnmkdm
       }
     } catch (error) {
       console.error('获取学校URL配置失败:', error)
@@ -403,17 +408,51 @@ function getSchoolUrlConfig(schoolId: string): {
       return serverUrlConfigsCache[schoolId]
     }
   }
-  
+
   // 检查是否是默认学校
   const defaultConfig = DEFAULT_SCHOOL_URL_CONFIG[schoolId]
   if (defaultConfig) {
     console.log(`📝 服务器端：学校 "${schoolId}" 使用默认URL配置`)
     return defaultConfig
   }
-  
-  // 回退到默认配置（仅当找不到任何配置时）
-  console.warn(`⚠️ 找不到学校 "${schoolId}" 的URL配置，回退到默认配置`)
-  return DEFAULT_SCHOOL_URL_CONFIG['tyust'] || {}
+
+  // 回退到通用默认 gnmkdm 参数（适用于大多数正方教务系统）
+  console.log(`📝 学校 "${schoolId}" 使用通用默认 gnmkdm 参数`)
+  return {
+    gradeGnmkdm: 'N305005',
+    courseGnmkdm: 'N253512',
+    scheduleGnmkdm: 'N253508'
+  }
+}
+
+// 直接从学校配置对象生成 API URLs（用于处理客户端传递的本地学校配置）
+export function getApiUrlsForSchool(school: SchoolConfig, urlConfig?: {
+  gradeGnmkdm?: string
+  courseGnmkdm?: string
+  scheduleGnmkdm?: string
+}) {
+  const baseUrl = `${school.protocol}://${school.domain}`
+
+  // 如果没有提供 urlConfig，使用默认的 gnmkdm 参数
+  const config = urlConfig || {
+    gradeGnmkdm: 'N305005',
+    courseGnmkdm: 'N253512',
+    scheduleGnmkdm: 'N253508'
+  }
+
+  console.log(`🔧 [服务器端] 使用请求中的学校配置: ${school.name} (${school.id})`)
+  console.log(`🔧 [服务器端] 基础URL: ${baseUrl}`)
+  console.log(`🔧 [服务器端] gnmkdm配置:`, config)
+
+  return {
+    baseUrl,
+    loginUrl: `${baseUrl}/`,
+    gradeUrl: `${baseUrl}/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=${config.gradeGnmkdm}`,
+    courseUrl: `${baseUrl}/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${config.courseGnmkdm}`,
+    scheduleUrl: `${baseUrl}/kbcx/xskbcx_cxXsKb.html?gnmkdm=${config.scheduleGnmkdm}`,
+    studentInfoUrl: `${baseUrl}/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801`,
+    selectCourseUrl: `${baseUrl}/xsxk/zzxkyzb_xkBcZyZzxkYzb.html?gnmkdm=${config.courseGnmkdm}`,
+  }
 }
 
 // 生成具体的API URL（支持传入schoolId参数，不依赖全局状态）
@@ -422,11 +461,11 @@ function getSchoolUrlConfig(schoolId: string): {
 export function getApiUrls(schoolId?: string) {
   // 如果提供了schoolId，优先使用指定的学校
   let school: SchoolConfig | undefined
-  
+
   if (schoolId) {
     // 先尝试从同步的学校列表中查找
     school = getSchoolById(schoolId)
-    
+
     // 如果找不到，可能是新添加的学校，尝试从所有学校中查找（包括服务器同步的）
     if (!school && typeof window !== 'undefined') {
       console.warn(`⚠️ 根据 schoolId "${schoolId}" 找不到学校，尝试同步获取...`)
@@ -441,7 +480,7 @@ export function getApiUrls(schoolId?: string) {
   } else {
     school = getCurrentSchool()
   }
-  
+
   // 确保使用的是正确的学校配置，而不是默认的
   if (!school || !school.domain) {
     console.error('❌ 获取学校配置失败，使用默认学校')
@@ -450,16 +489,16 @@ export function getApiUrls(schoolId?: string) {
     const urlConfig = getSchoolUrlConfig(defaultSchool.id)
     return generateApiUrls(baseUrl, urlConfig, defaultSchool)
   }
-  
+
   // 验证学校ID是否匹配（如果提供了schoolId）
   if (schoolId && school.id !== schoolId) {
     console.error(`❌ 学校ID不匹配：请求的是 "${schoolId}"，但实际使用的是 "${school.id}" (${school.name})`)
     console.error(`❌ 这可能导致使用了错误的学校域名！`)
   }
-  
+
   const baseUrl = `${school.protocol}://${school.domain}`
   const urlConfig = getSchoolUrlConfig(school.id)
-  
+
   // 调试日志：检查URL配置是否正确
   console.log(`🔍 ========== 生成API URL ==========`)
   console.log(`🔍 请求的 schoolId: ${schoolId || '(未指定，使用当前学校)'}`)
@@ -468,7 +507,7 @@ export function getApiUrls(schoolId?: string) {
   console.log(`🔍 基础URL: ${baseUrl}`)
   console.log(`🔍 URL配置:`, urlConfig)
   console.log(`🔍 =================================`)
-  
+
   // 如果URL配置为空且不是默认学校，警告用户
   if (!urlConfig || Object.keys(urlConfig).length === 0) {
     const isDefault = DEFAULT_SCHOOL_URL_CONFIG[school.id]
@@ -477,7 +516,7 @@ export function getApiUrls(schoolId?: string) {
       console.warn(`⚠️ 请在后台管理中为学校 "${school.name}" 配置 gradeGnmkdm、courseGnmkdm、scheduleGnmkdm 参数`)
     }
   }
-  
+
   return generateApiUrls(baseUrl, urlConfig, school)
 }
 
@@ -487,40 +526,40 @@ function generateApiUrls(baseUrl: string, urlConfig: {
   courseGnmkdm?: string
   scheduleGnmkdm?: string
 }, school: SchoolConfig) {
-  
+
   return {
     // 学生信息
     studentInfo: `${baseUrl}/jwglxt/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
-    
+
     // 选课参数
     courseSelectionParams: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
-    
+
     // 选课显示页面（用于获取完整参数）
     courseSelectionDisplay: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 可选课程
     availableCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 已选课程
     selectedCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 课表参数
     scheduleParams: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
-    
+
     // 课表数据
     scheduleData: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
-    
+
     // 成绩查询（根据学校配置）
     gradeQuery: `${baseUrl}/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
     gradePage: `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
-    
+
     // 总体成绩查询
     overallGradeIndex: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
     overallGradeQuery: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
-    
+
     // 选课执行
     courseSelection: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
-    
+
     // Referer头
     getRefererHeader: (type: 'course' | 'schedule' | 'student' | 'grade' | 'overallGrade') => {
       switch (type) {
@@ -544,19 +583,19 @@ function generateApiUrls(baseUrl: string, urlConfig: {
 // 异步版本的API URL生成函数（支持服务器端获取URL配置）
 export async function getApiUrlsAsync(schoolId?: string) {
   let school: SchoolConfig | undefined
-  
+
   // 在服务器端，从文件或COS加载学校列表
   if (typeof window === 'undefined') {
     if (schoolId) {
       // 从服务器加载学校列表（强制刷新，不使用缓存）
       const schools = await getSchoolsFromServer()
-      
+
       console.log(`🔍 [服务器端] 请求的 schoolId: "${schoolId}"`)
       console.log(`🔍 [服务器端] 已加载 ${schools.length} 所学校`)
       console.log(`🔍 [服务器端] 学校列表:`, schools.map((s: SchoolConfig) => `${s.name} (${s.id})`).join(', '))
-      
+
       school = schools.find(s => s.id === schoolId)
-      
+
       if (!school) {
         console.error(`❌ 服务器端：找不到学校 ID "${schoolId}"`)
         console.error(`❌ 可用的学校列表:`, schools.map((s: SchoolConfig) => `${s.name} (${s.id})`).join(', '))
@@ -582,15 +621,15 @@ export async function getApiUrlsAsync(schoolId?: string) {
     // 客户端：使用原有逻辑
     school = schoolId ? (getSchoolById(schoolId) || getCurrentSchool()) : getCurrentSchool()
   }
-  
+
   if (!school || !school.domain) {
     console.error('❌ 获取学校配置失败，使用默认学校')
     school = DEFAULT_SCHOOL
   }
-  
+
   const baseUrl = `${school.protocol}://${school.domain}`
   const urlConfig = await getSchoolUrlConfigAsync(school.id)
-  
+
   // 服务器端调试日志
   if (typeof window === 'undefined') {
     console.log(`🔍 ========== [服务器端] 生成API URL ==========`)
@@ -600,40 +639,40 @@ export async function getApiUrlsAsync(schoolId?: string) {
     console.log(`🔍 [服务器端] URL配置:`, urlConfig)
     console.log(`🔍 ============================================`)
   }
-  
+
   return {
     // 学生信息
     studentInfo: `${baseUrl}/jwglxt/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
-    
+
     // 选课参数
     courseSelectionParams: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
-    
+
     // 选课显示页面（用于获取完整参数）
     courseSelectionDisplay: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 可选课程
     availableCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 已选课程
     selectedCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
-    
+
     // 课表参数
     scheduleParams: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
-    
+
     // 课表数据
     scheduleData: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
-    
+
     // 成绩查询（根据学校配置）
     gradeQuery: `${baseUrl}/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
     gradePage: `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
-    
+
     // 总体成绩查询
     overallGradeIndex: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
     overallGradeQuery: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
-    
+
     // 选课执行
     courseSelection: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
-    
+
     // Referer头
     getRefererHeader: (type: 'course' | 'schedule' | 'student' | 'grade' | 'overallGrade') => {
       switch (type) {
@@ -658,7 +697,7 @@ export async function getApiUrlsAsync(schoolId?: string) {
 export function getDebugInfo() {
   const school = getCurrentSchool()
   const urls = getApiUrls()
-  
+
   return {
     currentSchool: school,
     urls: urls,

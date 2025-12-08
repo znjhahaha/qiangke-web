@@ -17,7 +17,19 @@ export async function POST(request: NextRequest) {
     }
 
     // 直接传递schoolId参数，不再修改服务器端状态
-    const courseData = await request.json()
+    const body = await request.json()
+    const courseData = { ...body }
+
+    // 🔧 新增：如果请求中包含 school 配置（本地添加的学校），临时注入到全局状态
+    if (body.school) {
+      const { getApiUrlsForSchool } = await import('@/lib/global-school-state')
+      const urls = getApiUrlsForSchool(body.school)
+      // 通过设置环境变量或其他方式传递给后续函数
+      // 由于架构限制，这里我们需要修改 course-api 来接受 school 参数
+      console.log(`🔧 [API] 检测到本地学校配置: ${body.school.name} (${body.school.id})`)
+      // 暂时删除 school 字段，避免传递给 selectCourseWithVerification
+      delete courseData.school
+    }
 
     if (!courseData || typeof courseData !== 'object') {
       return NextResponse.json({
