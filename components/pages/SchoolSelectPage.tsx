@@ -141,26 +141,35 @@ export default function SchoolSelectPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="glass">
+        <Card className="premium-card">
           <CardHeader className="p-3 sm:p-6">
             <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-              <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              <span>当前学校</span>
+              <div className="relative">
+                <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 relative z-10" />
+                <div className="absolute inset-0 bg-green-500/30 blur-sm rounded-full animate-pulse-slow"></div>
+              </div>
+              <span className="text-white">当前学校</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
-            <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-green-50/10 rounded-lg border border-green-500/20">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <School className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
+            <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gradient-to-r from-green-500/10 to-green-500/5 rounded-xl border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner border border-green-500/30">
+                <School className="h-5 w-5 sm:h-7 sm:w-7 text-green-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-semibold text-green-400 truncate">{selectedSchool.name}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">{selectedSchool.domain}</p>
-                <p className="text-[10px] sm:text-xs text-green-600 mt-1 line-clamp-2">{selectedSchool.description}</p>
+                <h3 className="text-base sm:text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300 truncate">{selectedSchool.name}</h3>
+                <p className="text-xs sm:text-sm text-green-200/70 truncate font-medium">{selectedSchool.domain}</p>
+                <p className="text-[10px] sm:text-xs text-green-400/60 mt-1 line-clamp-2">{selectedSchool.description}</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="text-xs sm:text-sm text-green-500 font-medium">已连接</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">教务系统</div>
+                <div className="flex items-center justify-end space-x-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-xs sm:text-sm text-green-400 font-bold">已连接</span>
+                </div>
+                <div className="text-[10px] sm:text-xs text-green-500/50 mt-1">教务系统</div>
               </div>
             </div>
           </CardContent>
@@ -174,23 +183,25 @@ export default function SchoolSelectPage() {
         transition={{ delay: 0.2 }}
       >
         <Card className="glass">
-          <CardHeader className="p-3 sm:p-6">
+          <CardHeader className="p-3 sm:p-6 border-b border-white/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                <CardTitle className="text-base sm:text-lg">支持的学校</CardTitle>
+                <div className="bg-blue-500/20 p-1.5 rounded-lg">
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                </div>
+                <CardTitle className="text-base sm:text-lg text-white">支持的学校</CardTitle>
               </div>
               <Button
                 onClick={() => setShowAddDialog(true)}
                 size="sm"
-                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white shadow-lg shadow-green-900/20 border border-green-500/20 transition-all duration-300 hover:scale-105"
               >
-                <Plus className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">添加学校</span>
-                <span className="sm:hidden">添加</span>
+                <Plus className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline font-medium">添加学校</span>
+                <span className="sm:hidden font-medium">添加</span>
               </Button>
             </div>
-            <CardDescription className="text-xs sm:text-sm">
+            <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-2">
               选择您所在的学校，系统将自动切换到对应的教务系统
             </CardDescription>
           </CardHeader>
@@ -204,76 +215,58 @@ export default function SchoolSelectPage() {
                   transition={{ delay: 0.3 + index * 0.1 }}
                 >
                   <Card
-                    className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedSchool.id === school.id
-                      ? 'ring-2 ring-green-500/50 bg-green-500/5'
-                      : 'hover:bg-blue-500/5 hover:ring-1 hover:ring-blue-500/30'
+                    className={`cursor-pointer transition-all duration-300 group relative overflow-hidden ${selectedSchool.id === school.id
+                        ? 'card-selected'
+                        : 'glass hover:bg-white/5 hover:border-blue-500/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
                       }`}
                     onClick={() => handleSchoolChange(school)}
                   >
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex items-center space-x-2 sm:space-x-4">
+                    {/* 选中时的光效背景 */}
+                    {selectedSchool.id === school.id && (
+                      <div className="absolute inset-0 bg-green-500/5 animate-pulse-slow pointer-events-none"></div>
+                    )}
+
+                    <CardContent className="p-3 sm:p-5 relative z-10">
+                      <div className="flex items-center space-x-3 sm:space-x-4">
                         {/* 学校图标 */}
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${selectedSchool.id === school.id
-                          ? 'bg-green-500/20'
-                          : 'bg-blue-500/20'
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 ${selectedSchool.id === school.id
+                            ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/30'
+                            : 'bg-white/5 border border-white/10 group-hover:bg-blue-500/10 group-hover:border-blue-500/30'
                           }`}>
-                          <School className={`h-5 w-5 sm:h-6 sm:w-6 ${selectedSchool.id === school.id
-                            ? 'text-green-500'
-                            : 'text-blue-500'
+                          <School className={`h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-300 ${selectedSchool.id === school.id
+                              ? 'text-green-400'
+                              : 'text-muted-foreground group-hover:text-blue-400'
                             }`} />
                         </div>
 
                         {/* 学校信息 */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2">
-                            <h3 className="text-base sm:text-lg font-semibold text-white truncate">{school.name}</h3>
-                            {selectedSchool.id === school.id && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                              >
-                                <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                              </motion.div>
-                            )}
-                          </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">{school.domain}</p>
-                          {school.description && (
-                            <p className="text-[10px] sm:text-xs text-blue-400 mt-1 line-clamp-2">{school.description}</p>
-                          )}
+                          <h3 className={`text-base font-semibold truncate transition-colors duration-300 ${selectedSchool.id === school.id
+                              ? 'text-green-400'
+                              : 'text-gray-200 group-hover:text-blue-300'
+                            }`}>
+                            {school.name}
+                          </h3>
+                          <p className={`text-xs truncate mt-1 transition-colors duration-300 ${selectedSchool.id === school.id
+                              ? 'text-green-500/60'
+                              : 'text-gray-500 group-hover:text-blue-400/60'
+                            }`}>
+                            {school.domain}
+                          </p>
                         </div>
 
-                        {/* 操作按钮 */}
-                        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                        {/* 状态指示 */}
+                        <div className="flex-shrink-0">
                           {selectedSchool.id === school.id ? (
-                            <div className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-400 text-xs sm:text-sm rounded-full whitespace-nowrap">
-                              当前
+                            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center animate-pulse-slow border border-green-500/20">
+                              <Check className="h-4 w-4 text-green-400" />
                             </div>
                           ) : (
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleSchoolChange(school)
-                              }}
-                              disabled={isSwitching}
-                              variant="outline"
-                              size="sm"
-                              className="btn-hover text-xs sm:text-sm px-2 sm:px-3"
-                            >
-                              {isSwitching ? (
-                                <>
-                                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
-                                  <span className="hidden sm:inline">切换中...</span>
-                                  <span className="sm:hidden">切换中</span>
-                                </>
-                              ) : (
-                                <>
-                                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                  <span className="hidden sm:inline">切换</span>
-                                  <span className="sm:hidden">切换</span>
-                                </>
-                              )}
-                            </Button>
+                            <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                <ExternalLink className="h-4 w-4 text-blue-400" />
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>

@@ -27,7 +27,14 @@
       "domain": "jwxt.cumt.edu.cn",
       "protocol": "http",
       "description": "教务"
+    },
+    {
+      "id": "weqwe1",
+      "name": "weqwe1",
+      "domain": "qeqeqe.fr.fref",
+      "protocol": "https",
+      "description": "weqwe1教务系统"
     }
   ],
-  "lastUpdated": 1762138763249
+  "lastUpdated": 1765162760307
 }

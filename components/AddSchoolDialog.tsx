@@ -90,21 +90,21 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="w-full max-w-lg"
                 >
-                    <Card className="glass">
-                        <CardHeader className="relative">
+                    <Card className="glass border-0 shadow-2xl">
+                        <CardHeader className="relative border-b border-white/5 p-4 sm:p-6">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-2 top-2"
+                                className="absolute right-2 top-2 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                                 onClick={onClose}
                             >
                                 <X className="h-4 w-4" />
                             </Button>
-                            <CardTitle className="flex items-center space-x-2">
+                            <CardTitle className="flex items-center space-x-2 text-white">
                                 <Plus className="h-5 w-5 text-green-500" />
                                 <span>添加学校</span>
                             </CardTitle>
-                            <CardDescription>
+                            <CardDescription className="text-gray-400">
                                 添加自定义学校到本地（仅保存在您的浏览器中）
                             </CardDescription>
                         </CardHeader>
@@ -235,7 +235,7 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white shadow-lg shadow-green-900/20 border border-green-500/20 transition-all duration-300 hover:scale-[1.02]"
                                         disabled={isSubmitting}
                                     >
                                         {isSubmitting ? '添加中...' : '添加学校'}
