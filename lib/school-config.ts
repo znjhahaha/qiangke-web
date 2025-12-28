@@ -6,6 +6,7 @@ export interface SchoolConfig {
   jwglxtPath: string
   description?: string
   protocol?: string
+  basePath?: string  // 基础路径，如 /jwglxt 或为空
 }
 
 // 支持的学校列表
@@ -16,7 +17,8 @@ export const SUPPORTED_SCHOOLS: SchoolConfig[] = [
     domain: 'newjwc.tyust.edu.cn',
     jwglxtPath: '/jwglxt/xtgl',
     description: '太原科技大学教务系统',
-    protocol: 'https'
+    protocol: 'https',
+    basePath: '/jwglxt'
   },
   {
     id: 'zjut',
@@ -24,7 +26,8 @@ export const SUPPORTED_SCHOOLS: SchoolConfig[] = [
     domain: 'www.gdjw.zjut.edu.cn',
     jwglxtPath: '/jwglxt/xtgl',
     description: '浙江工业大学教务系统',
-    protocol: 'http'
+    protocol: 'http',
+    basePath: '/jwglxt'
   }
 ]
 
@@ -34,19 +37,22 @@ export const DEFAULT_SCHOOL = SUPPORTED_SCHOOLS[0]
 // 获取学校完整URL
 export function getSchoolBaseUrl(school: SchoolConfig): string {
   const protocol = school.protocol || 'https'
-  return `${protocol}://${school.domain}${school.jwglxtPath}`
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  return `${protocol}://${school.domain}${basePath}`
 }
 
 // 获取学校登录页面URL
 export function getSchoolLoginUrl(school: SchoolConfig): string {
   const protocol = school.protocol || 'https'
-  return `${protocol}://${school.domain}/jwglxt/xtgl/login_slogin.html`
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  return `${protocol}://${school.domain}${basePath}/xtgl/login_slogin.html`
 }
 
 // 获取学校主页URL
 export function getSchoolHomeUrl(school: SchoolConfig): string {
   const protocol = school.protocol || 'https'
-  return `${protocol}://${school.domain}/jwglxt/xtgl/index_initMenu.html`
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  return `${protocol}://${school.domain}${basePath}/xtgl/index_initMenu.html`
 }
 
 // 根据ID获取学校配置

@@ -44,3 +44,6 @@ next-env.d.ts
 *.aab
 *.jks
 *.keystore
+
+# Exclude Android project subdirectory
+/nextjs-course-selector-app/

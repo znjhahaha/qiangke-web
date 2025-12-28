@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, School, Globe, Lock, Info } from 'lucide-react'
+import { X, Plus, School, Globe, Lock, Info, Wand2, Link } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,9 +22,90 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
         name: '',
         domain: '',
         protocol: 'https' as 'http' | 'https',
+        basePath: '/jwglxt',
         description: ''
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [smartUrl, setSmartUrl] = useState('')
+
+    // 智能 URL 解析函数
+    const parseUrl = (url: string) => {
+        if (!url.trim()) {
+            toast.error('请输入 URL')
+            return
+        }
+
+        try {
+            let cleanUrl = url.trim()
+            let protocol: 'http' | 'https' = 'https'
+
+            // 提取协议
+            if (cleanUrl.startsWith('https://')) {
+                protocol = 'https'
+                cleanUrl = cleanUrl.substring(8)
+            } else if (cleanUrl.startsWith('http://')) {
+                protocol = 'http'
+                cleanUrl = cleanUrl.substring(7)
+            }
+
+            // 提取域名
+            const pathStart = cleanUrl.indexOf('/')
+            let domain: string
+            let pathPart: string
+
+            if (pathStart > 0) {
+                domain = cleanUrl.substring(0, pathStart)
+                pathPart = cleanUrl.substring(pathStart)
+            } else {
+                domain = cleanUrl
+                pathPart = ''
+            }
+
+            // 移除域名中的端口号后面的查询参数
+            domain = domain.split('?')[0].split('#')[0]
+
+            // 智能识别 basePath
+            let basePath = '/jwglxt'
+
+            // 常见的正方教务系统基础路径
+            const commonBasePaths = ['/jwglxt', '/jwxt', '/jwxs', '/jw', '/jwweb']
+            let foundBasePath = false
+
+            for (const commonPath of commonBasePaths) {
+                if (pathPart.startsWith(commonPath + '/') || pathPart === commonPath) {
+                    basePath = commonPath
+                    foundBasePath = true
+                    break
+                }
+            }
+
+            // 如果没有找到常见路径，检查是否是直接模块访问（无基础路径）
+            if (!foundBasePath && pathPart) {
+                // 检查是否直接以模块路径开始
+                const directModulePaths = ['/xsxk', '/cjcx', '/kbcx', '/xtgl', '/xsxy', '/login']
+                for (const modulePath of directModulePaths) {
+                    if (pathPart.startsWith(modulePath + '/') || pathPart === modulePath) {
+                        basePath = ''  // 无基础路径
+                        foundBasePath = true
+                        break
+                    }
+                }
+            }
+
+            // 更新表单数据
+            setFormData(prev => ({
+                ...prev,
+                domain,
+                protocol,
+                basePath
+            }))
+
+            toast.success(`识别成功！${basePath ? `基础路径: ${basePath}` : '无基础路径（短URL）'}`)
+        } catch (error) {
+            console.error('URL 解析错误:', error)
+            toast.error('URL 格式无效')
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -36,6 +117,7 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                 name: formData.name.trim(),
                 domain: formData.domain.toLowerCase().trim(),
                 protocol: formData.protocol,
+                basePath: formData.basePath.trim(),
                 description: formData.description.trim() || `${formData.name}教务系统`
             }
 
@@ -50,8 +132,10 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                 name: '',
                 domain: '',
                 protocol: 'https',
+                basePath: '/jwglxt',
                 description: ''
             })
+            setSmartUrl('')
 
             // 通知父组件刷新列表
             onSuccess()
@@ -88,7 +172,7 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="w-full max-w-lg"
+                    className="w-full max-w-lg max-h-[90vh] overflow-y-auto"
                 >
                     <Card className="glass border-0 shadow-2xl">
                         <CardHeader className="relative border-b border-white/5 p-4 sm:p-6">
@@ -109,8 +193,36 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                             </CardDescription>
                         </CardHeader>
 
-                        <CardContent>
+                        <CardContent className="p-4 sm:p-6">
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* 智能 URL 识别 */}
+                                <div className="space-y-2 p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                                    <Label className="flex items-center space-x-2 text-purple-400">
+                                        <Wand2 className="h-4 w-4" />
+                                        <span>智能 URL 识别（推荐）</span>
+                                    </Label>
+                                    <div className="flex space-x-2">
+                                        <Input
+                                            placeholder="粘贴教务系统任意页面 URL"
+                                            value={smartUrl}
+                                            onChange={(e) => setSmartUrl(e.target.value)}
+                                            className="bg-white/5 flex-1"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => parseUrl(smartUrl)}
+                                            className="shrink-0 border-purple-500/30 hover:bg-purple-500/20"
+                                        >
+                                            <Link className="h-4 w-4 mr-1" />
+                                            识别
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        粘贴教务系统 URL，自动识别协议、域名和基础路径
+                                    </p>
+                                </div>
+
                                 {/* 学校名称 */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name" className="flex items-center space-x-2">
@@ -163,6 +275,24 @@ export default function AddSchoolDialog({ isOpen, onClose, onSuccess }: AddSchoo
                                     />
                                     <p className="text-xs text-muted-foreground">
                                         教务系统的域名（不包含 http:// 或 https://）
+                                    </p>
+                                </div>
+
+                                {/* 基础路径 */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="basePath" className="flex items-center space-x-2">
+                                        <Link className="h-4 w-4 text-orange-500" />
+                                        <span>基础路径</span>
+                                    </Label>
+                                    <Input
+                                        id="basePath"
+                                        placeholder="例如：/jwglxt 或留空"
+                                        value={formData.basePath}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, basePath: e.target.value }))}
+                                        className="bg-white/5"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        教务系统基础路径，通常为 /jwglxt。如果系统没有基础路径，请留空。
                                     </p>
                                 </div>
 

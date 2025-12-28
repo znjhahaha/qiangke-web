@@ -13,6 +13,7 @@ const defaultSchools: SchoolConfig[] = [
     name: '太原科技大学',
     domain: 'newjwc.tyust.edu.cn',
     protocol: 'https',
+    basePath: '/jwglxt',
     description: '太原科技大学教务系统'
   },
   {
@@ -20,6 +21,7 @@ const defaultSchools: SchoolConfig[] = [
     name: '浙江工业大学',
     domain: 'www.gdjw.zjut.edu.cn',
     protocol: 'http',
+    basePath: '/jwglxt',
     description: '浙江工业大学教务系统'
   }
 ]
@@ -56,7 +58,7 @@ async function saveSchools(schools: SchoolConfig[]) {
 // 从文件或 COS 加载URL配置
 async function loadUrlConfigs(): Promise<Record<string, any>> {
   const { urlConfigsFile } = await initDataPaths()
-  
+
   // 优先使用 COS 存储
   if (isCosEnabled()) {
     try {
@@ -140,10 +142,10 @@ export async function GET(request: NextRequest) {
   try {
     // 确保数据已加载
     await initSchools()
-    
+
     const { searchParams } = new URL(request.url)
     const lastSync = searchParams.get('lastSync')
-    
+
     return NextResponse.json({
       success: true,
       data: serverSchools,
@@ -165,7 +167,7 @@ export async function POST(request: NextRequest) {
   try {
     // 验证管理员权限（使用请求头中的管理员令牌）
     const adminToken = request.headers.get('x-admin-token')
-    
+
     // 简单的权限验证（生产环境应使用更安全的验证方式）
     const validToken = process.env.ADMIN_SECRET_TOKEN || 'Znj00751_admin_2024'
     if (adminToken !== validToken) {
@@ -193,12 +195,13 @@ export async function POST(request: NextRequest) {
         name: school.name,
         domain: school.domain,
         protocol: school.protocol || 'https',
+        basePath: school.basePath,
         description: school.description || ''
       }
 
       // 确保数据已加载
       await initSchools()
-      
+
       if (action === 'add') {
         // 检查ID是否已存在
         if (serverSchools.some(s => s.id === schoolData.id)) {
@@ -222,7 +225,7 @@ export async function POST(request: NextRequest) {
       // 保存到文件系统
       await saveSchools(serverSchools)
       lastUpdateTime = Date.now()
-      
+
       return NextResponse.json({
         success: true,
         message: `学校 "${schoolData.name}" ${action === 'add' ? '已添加' : '已更新'}`,
@@ -255,7 +258,7 @@ export async function POST(request: NextRequest) {
 
       serverSchools = serverSchools.filter(s => s.id !== schoolId)
       delete serverUrlConfigs[schoolId]
-      
+
       // 保存到文件系统
       await saveSchools(serverSchools)
       await saveUrlConfigs(serverUrlConfigs)
@@ -281,7 +284,7 @@ export async function POST(request: NextRequest) {
       await initSchools()
 
       serverUrlConfigs[schoolId] = urlConfig
-      
+
       // 保存到文件系统
       await saveUrlConfigs(serverUrlConfigs)
       lastUpdateTime = Date.now()

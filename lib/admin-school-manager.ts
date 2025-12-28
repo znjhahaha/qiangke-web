@@ -124,14 +124,16 @@ export function getDefaultSchools(): SchoolConfig[] {
       name: '太原科技大学',
       domain: 'newjwc.tyust.edu.cn',
       protocol: 'https',
-      description: '太原科技大学教务系统'
+      description: '太原科技大学教务系统',
+      basePath: '/jwglxt'
     },
     {
       id: 'zjut',
       name: '浙江工业大学',
       domain: 'www.gdjw.zjut.edu.cn',
       protocol: 'http',
-      description: '浙江工业大学教务系统'
+      description: '浙江工业大学教务系统',
+      basePath: '/jwglxt'
     }
   ]
 }

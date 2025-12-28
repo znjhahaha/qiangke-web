@@ -8,6 +8,11 @@ export class UrlConfig {
     this.school = school
   }
 
+  // 获取基础路径
+  get basePath(): string {
+    return this.school.basePath !== undefined ? this.school.basePath : '/jwglxt'
+  }
+
   // 获取基础URL
   get baseUrl(): string {
     return getSchoolBaseUrl(this.school)
@@ -19,52 +24,57 @@ export class UrlConfig {
     return `${protocol}://${this.school.domain}`
   }
 
+  // 获取完整基础路径（域名 + basePath）
+  get fullBasePath(): string {
+    return `${this.domain}${this.basePath}`
+  }
+
   // 登录相关URL
   get loginPageUrl(): string {
-    return `${this.domain}/jwglxt/xtgl/login_slogin.html`
+    return `${this.fullBasePath}/xtgl/login_slogin.html`
   }
 
   get loginUrl(): string {
-    return `${this.domain}/jwglxt/xtgl/login_slogin.html`
+    return `${this.fullBasePath}/xtgl/login_slogin.html`
   }
 
   get homeUrl(): string {
-    return `${this.domain}/jwglxt/xtgl/index_initMenu.html`
+    return `${this.fullBasePath}/xtgl/index_initMenu.html`
   }
 
   // 课程选择相关URL
   get courseSelectionIndexUrl(): string {
-    return `${this.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default&su=${this.school.domain}`
+    return `${this.fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default&su=${this.school.domain}`
   }
 
   get courseSelectionUrl(): string {
-    return `${this.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
+    return `${this.fullBasePath}/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
   }
 
   get courseSelectionParamsUrl(): string {
-    return `${this.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default&su=${this.school.domain}`
+    return `${this.fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default&su=${this.school.domain}`
   }
 
   get courseSelectionExecuteUrl(): string {
-    return `${this.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
+    return `${this.fullBasePath}/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
   }
 
   get courseSelectionVerifyUrl(): string {
-    return `${this.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
+    return `${this.fullBasePath}/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=N253512`
   }
 
   // 课表相关URL
   get scheduleIndexUrl(): string {
-    return `${this.domain}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N253508&layout=default`
+    return `${this.fullBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N253508&layout=default`
   }
 
   get scheduleUrl(): string {
-    return `${this.domain}/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=N253508`
+    return `${this.fullBasePath}/kbcx/xskbcx_cxXsKb.html?gnmkdm=N253508`
   }
 
   // 学生信息相关URL
   get studentInfoUrl(): string {
-    return `${this.domain}/jwglxt/xsxxxggl/xsgrxxwh_cxXsgrxx.html?gnmkdm=N100801&layout=default&su=${this.school.domain}`
+    return `${this.fullBasePath}/xsxxxggl/xsgrxxwh_cxXsgrxx.html?gnmkdm=N100801&layout=default&su=${this.school.domain}`
   }
 
   // 获取Referer头
@@ -115,12 +125,12 @@ export function getUrlConfig(school?: SchoolConfig): UrlConfig {
       globalUrlConfig = new UrlConfig(currentSchool)
     }
   }
-  
+
   // 添加调试信息
   if (!school) {
     console.log(`🔍 getUrlConfig() 返回: ${globalUrlConfig.getCurrentSchool().name} - ${globalUrlConfig.domain}`)
   }
-  
+
   return globalUrlConfig
 }
 

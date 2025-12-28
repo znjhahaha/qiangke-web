@@ -5,6 +5,7 @@ export interface SchoolConfig {
   domain: string
   protocol: string
   description?: string
+  basePath?: string  // 基础路径，如 /jwglxt 或为空
 }
 
 // 支持的学校列表（动态获取，包含默认和自定义学校）
@@ -22,14 +23,16 @@ export function getSupportedSchools(): SchoolConfig[] {
       name: '太原科技大学',
       domain: 'newjwc.tyust.edu.cn',
       protocol: 'https',
-      description: '太原科技大学教务系统'
+      description: '太原科技大学教务系统',
+      basePath: '/jwglxt'
     },
     {
       id: 'zjut',
       name: '浙江工业大学',
       domain: 'www.gdjw.zjut.edu.cn',
       protocol: 'http',
-      description: '浙江工业大学教务系统'
+      description: '浙江工业大学教务系统',
+      basePath: '/jwglxt'
     }
   ]
 }
@@ -49,14 +52,16 @@ const DEFAULT_SCHOOLS_LIST: SchoolConfig[] = [
     name: '太原科技大学',
     domain: 'newjwc.tyust.edu.cn',
     protocol: 'https',
-    description: '太原科技大学教务系统'
+    description: '太原科技大学教务系统',
+    basePath: '/jwglxt'
   },
   {
     id: 'zjut',
     name: '浙江工业大学',
     domain: 'www.gdjw.zjut.edu.cn',
     protocol: 'http',
-    description: '浙江工业大学教务系统'
+    description: '浙江工业大学教务系统',
+    basePath: '/jwglxt'
   }
 ]
 
@@ -432,6 +437,9 @@ export function getApiUrlsForSchool(school: SchoolConfig, urlConfig?: {
   scheduleGnmkdm?: string
 }) {
   const baseUrl = `${school.protocol}://${school.domain}`
+  // 使用学校配置的 basePath，默认为 /jwglxt（向后兼容）
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  const fullBasePath = `${baseUrl}${basePath}`
 
   // 如果没有提供 urlConfig，使用默认的 gnmkdm 参数
   const config = urlConfig || {
@@ -442,16 +450,17 @@ export function getApiUrlsForSchool(school: SchoolConfig, urlConfig?: {
 
   console.log(`🔧 [服务器端] 使用请求中的学校配置: ${school.name} (${school.id})`)
   console.log(`🔧 [服务器端] 基础URL: ${baseUrl}`)
+  console.log(`🔧 [服务器端] basePath: ${basePath}`)
   console.log(`🔧 [服务器端] gnmkdm配置:`, config)
 
   return {
     baseUrl,
     loginUrl: `${baseUrl}/`,
-    gradeUrl: `${baseUrl}/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=${config.gradeGnmkdm}`,
-    courseUrl: `${baseUrl}/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${config.courseGnmkdm}`,
-    scheduleUrl: `${baseUrl}/kbcx/xskbcx_cxXsKb.html?gnmkdm=${config.scheduleGnmkdm}`,
-    studentInfoUrl: `${baseUrl}/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801`,
-    selectCourseUrl: `${baseUrl}/xsxk/zzxkyzb_xkBcZyZzxkYzb.html?gnmkdm=${config.courseGnmkdm}`,
+    gradeUrl: `${fullBasePath}/cjcx/cjcx_cxDgXscj.html?doType=query&gnmkdm=${config.gradeGnmkdm}`,
+    courseUrl: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${config.courseGnmkdm}`,
+    scheduleUrl: `${fullBasePath}/kbcx/xskbcx_cxXsKb.html?gnmkdm=${config.scheduleGnmkdm}`,
+    studentInfoUrl: `${fullBasePath}/xsxxxggl/xsxxwh_cxCkDgxsxx.html?gnmkdm=N100801`,
+    selectCourseUrl: `${fullBasePath}/xsxk/zzxkyzb_xkBcZyZzxkYzb.html?gnmkdm=${config.courseGnmkdm}`,
   }
 }
 
@@ -526,53 +535,56 @@ function generateApiUrls(baseUrl: string, urlConfig: {
   courseGnmkdm?: string
   scheduleGnmkdm?: string
 }, school: SchoolConfig) {
+  // 使用学校配置的 basePath，默认为 /jwglxt（向后兼容）
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  const fullBasePath = `${baseUrl}${basePath}`
 
   return {
     // 学生信息
-    studentInfo: `${baseUrl}/jwglxt/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
+    studentInfo: `${fullBasePath}/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
 
     // 选课参数
-    courseSelectionParams: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
+    courseSelectionParams: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
 
     // 选课显示页面（用于获取完整参数）
-    courseSelectionDisplay: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    courseSelectionDisplay: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 可选课程
-    availableCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    availableCourses: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 已选课程
-    selectedCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    selectedCourses: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 课表参数
-    scheduleParams: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
+    scheduleParams: `${fullBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
 
     // 课表数据
-    scheduleData: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
+    scheduleData: `${fullBasePath}/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
 
     // 成绩查询（根据学校配置）
-    gradeQuery: `${baseUrl}/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
-    gradePage: `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
+    gradeQuery: `${fullBasePath}/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
+    gradePage: `${fullBasePath}/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
 
     // 总体成绩查询
-    overallGradeIndex: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
-    overallGradeQuery: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
+    overallGradeIndex: `${fullBasePath}/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
+    overallGradeQuery: `${fullBasePath}/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
 
     // 选课执行
-    courseSelection: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
+    courseSelection: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
 
     // Referer头
     getRefererHeader: (type: 'course' | 'schedule' | 'student' | 'grade' | 'overallGrade') => {
       switch (type) {
         case 'course':
-          return `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`
+          return `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`
         case 'schedule':
-          return `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`
+          return `${fullBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`
         case 'student':
-          return `${baseUrl}/jwglxt/xtgl/index_initMenu.html`
+          return `${fullBasePath}/xtgl/index_initMenu.html`
         case 'grade':
-          return `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`
+          return `${fullBasePath}/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`
         case 'overallGrade':
-          return `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`
+          return `${fullBasePath}/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`
         default:
           return baseUrl
       }
@@ -636,56 +648,61 @@ export async function getApiUrlsAsync(schoolId?: string) {
     console.log(`🔍 [服务器端] 学校: ${school.name} (${school.id})`)
     console.log(`🔍 [服务器端] 域名: ${school.domain}, 协议: ${school.protocol}`)
     console.log(`🔍 [服务器端] 基础URL: ${baseUrl}`)
+    console.log(`🔍 [服务器端] basePath: ${school.basePath !== undefined ? school.basePath : '/jwglxt'}`)
     console.log(`🔍 [服务器端] URL配置:`, urlConfig)
     console.log(`🔍 ============================================`)
   }
 
+  // 使用学校配置的 basePath，默认为 /jwglxt（向后兼容）
+  const basePath = school.basePath !== undefined ? school.basePath : '/jwglxt'
+  const fullBasePath = `${baseUrl}${basePath}`
+
   return {
     // 学生信息
-    studentInfo: `${baseUrl}/jwglxt/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
+    studentInfo: `${fullBasePath}/xtgl/index_cxYhxxIndex.html?xt=jw&localeKey=zh_CN&_=${Date.now()}&gnmkdm=index`,
 
     // 选课参数
-    courseSelectionParams: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
+    courseSelectionParams: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`,
 
     // 选课显示页面（用于获取完整参数）
-    courseSelectionDisplay: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    courseSelectionDisplay: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 可选课程
-    availableCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    availableCourses: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 已选课程
-    selectedCourses: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
+    selectedCourses: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=${urlConfig.courseGnmkdm}`,
 
     // 课表参数
-    scheduleParams: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
+    scheduleParams: `${fullBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
 
     // 课表数据
-    scheduleData: `${baseUrl}/jwglxt/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
+    scheduleData: `${fullBasePath}/kbcx/xskbcx_cxXsKb.html?gnmkdm=${urlConfig.scheduleGnmkdm}`,
 
     // 成绩查询（根据学校配置）
-    gradeQuery: `${baseUrl}/jwglxt/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
-    gradePage: `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
+    gradeQuery: `${fullBasePath}/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=${urlConfig.gradeGnmkdm}`,
+    gradePage: `${fullBasePath}/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`,
 
     // 总体成绩查询
-    overallGradeIndex: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
-    overallGradeQuery: `${baseUrl}/jwglxt/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
+    overallGradeIndex: `${fullBasePath}/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`,
+    overallGradeQuery: `${fullBasePath}/xsxy/xsxyqk_cxJxzxjhxfyqKcxx.html?gnmkdm=N105515`,
 
     // 选课执行
-    courseSelection: `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
+    courseSelection: `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzb.html?gnmkdm=${urlConfig.courseGnmkdm}&su=${school.domain}`,
 
     // Referer头
     getRefererHeader: (type: 'course' | 'schedule' | 'student' | 'grade' | 'overallGrade') => {
       switch (type) {
         case 'course':
-          return `${baseUrl}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`
+          return `${fullBasePath}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=${urlConfig.courseGnmkdm}&layout=default&su=${school.domain}`
         case 'schedule':
-          return `${baseUrl}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`
+          return `${fullBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=${urlConfig.scheduleGnmkdm}`
         case 'student':
-          return `${baseUrl}/jwglxt/xtgl/index_initMenu.html`
+          return `${fullBasePath}/xtgl/index_initMenu.html`
         case 'grade':
-          return `${baseUrl}/jwglxt/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`
+          return `${fullBasePath}/cjcx/cjcx_cxDgXscj.html?gnmkdm=${urlConfig.gradeGnmkdm}&layout=default`
         case 'overallGrade':
-          return `${baseUrl}/jwglxt/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`
+          return `${fullBasePath}/xsxy/xsxyqk_cxXsxyqkIndex.html?gnmkdm=N105515&layout=default`
         default:
           return baseUrl
       }

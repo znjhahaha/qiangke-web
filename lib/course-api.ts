@@ -463,7 +463,7 @@ export async function getSelectedCourses(sessionId?: string, tempCookie?: string
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
         'Origin': `${currentSchool.protocol}://${currentSchool.domain}`,
         'Pragma': 'no-cache',
-        'Referer': `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default`,
+        'Referer': `${currentSchool.protocol}://${currentSchool.domain}${currentSchool.basePath ?? '/jwglxt'}/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default`,
         'X-Requested-With': 'XMLHttpRequest'
       }
 
@@ -480,7 +480,8 @@ export async function getSelectedCourses(sessionId?: string, tempCookie?: string
       config.method = 'POST'
 
       // 使用正确的已选课程接口URL
-      const selectedCoursesUrl = `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=N253512`
+      const basePath = currentSchool.basePath ?? '/jwglxt'
+      const selectedCoursesUrl = `${currentSchool.protocol}://${currentSchool.domain}${basePath}/xsxk/zzxkyzb_cxZzxkYzbChoosedDisplay.html?gnmkdm=N253512`
       console.log(`🌐 已选课程URL: ${selectedCoursesUrl}`)
       console.log(`📋 POST数据: ${formData.toString()}`)
 
@@ -1062,7 +1063,8 @@ async function executeCourseSelection(
       : courseData.kch_id
 
     // 使用新的选课URL: zzxkyzbjk_xkBcZyZzxkYzb.html
-    const courseSelectionUrl = `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/xsxk/zzxkyzbjk_xkBcZyZzxkYzb.html?gnmkdm=N253512`
+    const courseBasePath = currentSchool.basePath ?? '/jwglxt'
+    const courseSelectionUrl = `${currentSchool.protocol}://${currentSchool.domain}${courseBasePath}/xsxk/zzxkyzbjk_xkBcZyZzxkYzb.html?gnmkdm=N253512`
 
     // ⚠️ 安全检查：确保 do_jxb_id 是加密的长字符串（通常100+字符），不是短ID（32字符）
     if (do_jxb_id && do_jxb_id.length < 50) {
@@ -1207,7 +1209,8 @@ export async function getScheduleData(sessionId?: string, tempCookie?: string, s
       }
 
       // 使用正确的课表API端点
-      const scheduleUrl = `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`
+      const scheduleBasePath = currentSchool.basePath ?? '/jwglxt'
+      const scheduleUrl = `${currentSchool.protocol}://${currentSchool.domain}${scheduleBasePath}/kbcx/xskbcx_cxXsgrkb.html?gnmkdm=N2151`
 
       // 获取动态参数（xnm, xqm）
       let xnm = '2025'
@@ -1243,7 +1246,7 @@ export async function getScheduleData(sessionId?: string, tempCookie?: string, s
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           'Origin': `${currentSchool.protocol}://${currentSchool.domain}`,
           'Pragma': 'no-cache',
-          'Referer': `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`,
+          'Referer': `${currentSchool.protocol}://${currentSchool.domain}${currentSchool.basePath ?? '/jwglxt'}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`,
           'Sec-Fetch-Dest': 'empty',
           'Sec-Fetch-Mode': 'cors',
           'Sec-Fetch-Site': 'same-origin',
@@ -1282,7 +1285,8 @@ async function getScheduleDynamicParams(cookie: string, schoolId?: string) {
     const currentSchool = schoolId ? (getSchoolById(schoolId) || getCurrentSchool()) : getCurrentSchool()
 
     // 获取课表页面来提取参数
-    const scheduleIndexUrl = `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`
+    const schedBasePath = currentSchool.basePath ?? '/jwglxt'
+    const scheduleIndexUrl = `${currentSchool.protocol}://${currentSchool.domain}${schedBasePath}/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default`
 
     console.log('🔍 正在获取课表页面参数...', scheduleIndexUrl)
 
@@ -1744,7 +1748,8 @@ export async function getCourseSelectionDetails(
 
     // 选课时获取必要参数的URL: zzxkyzbjk_cxJxbWithKchZzxkYzb.html
     // 这个接口用于获取某门课程的选课必要参数（如jxb_id等），需要传入kch_id和xkkz_id
-    const selectionDetailsUrl = `${currentSchool.protocol}://${currentSchool.domain}/jwglxt/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html?gnmkdm=N253512`
+    const detailsBasePath = currentSchool.basePath ?? '/jwglxt'
+    const selectionDetailsUrl = `${currentSchool.protocol}://${currentSchool.domain}${detailsBasePath}/xsxk/zzxkyzbjk_cxJxbWithKchZzxkYzb.html?gnmkdm=N253512`
     console.log(`📤 获取选课必要参数 - POST请求到: ${selectionDetailsUrl}`)
 
     const response = await fetch(selectionDetailsUrl, {

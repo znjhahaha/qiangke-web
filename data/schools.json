@@ -5,36 +5,49 @@
       "name": "太原科技大学",
       "domain": "newjwc.tyust.edu.cn",
       "protocol": "https",
-      "description": "太原科技大学教务系统"
+      "description": "太原科技大学教务系统",
+      "basePath": "/jwglxt"
     },
     {
       "id": "zjut",
       "name": "浙江工业大学",
-      "domain": "www.gdjw.zjut.edu.cn",
+      "domain": "www.gdjwjf.zjut.edu.cn",
       "protocol": "http",
-      "description": "浙江工业大学教务系统"
+      "description": "浙江工业大学教务系统",
+      "basePath": "/jwglxt"
     },
     {
       "id": "313",
       "name": "1313",
       "domain": "adad.dadawda.ada",
       "protocol": "https",
-      "description": ""
+      "description": "",
+      "basePath": "/jwglxt"
     },
     {
       "id": "CUMT",
       "name": "中国矿业大学",
       "domain": "jwxt.cumt.edu.cn",
       "protocol": "http",
-      "description": "教务"
+      "description": "教务",
+      "basePath": "/jwglxt"
     },
     {
       "id": "weqwe1",
       "name": "weqwe1",
       "domain": "qeqeqe.fr.fref",
       "protocol": "https",
-      "description": "weqwe1教务系统"
+      "description": "weqwe1教务系统",
+      "basePath": "/jwglxt"
+    },
+    {
+      "id": "hzcu",
+      "name": "浙大城市学院",
+      "domain": "ijw.hzcu.edu.cn",
+      "protocol": "http",
+      "basePath": "",
+      "description": "浙大城市学院教务系统"
     }
   ],
-  "lastUpdated": 1765162760307
+  "lastUpdated": 1766911090261
 }
